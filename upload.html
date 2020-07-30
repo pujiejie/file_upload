@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+        }
+
+        a {
+            color: #000;
+            text-decoration: none;
+        }
+
+        .fileUpload {
+            display: block;
+            width: 400px;
+            height: 600px;
+            border: 1px dashed #000;
+            text-align: center;
+            line-height: 600px;
+            position: relative;
+        }
+
+        .process {
+            display: block;
+            height: 15px;
+            border-radius: 5px;
+            background-color: skyblue;
+            width: 0;
+            overflow: hidden;
+            position: absolute;
+            bottom: 220px;
+            left: 0;
+            line-height: 1em;
+            color: #f99;
+            text-align: right;
+        }
+        .fileView {
+            white-space: nowrap;
+            overflow: hidden;
+        }
+    </style>
+</head>
+
+<body>
+    <a href="javascript:;" class="fileUpload">
+        <span class="fileView">👆👆👆拖拽文件到此上传👆👆👆</span>
+        <span class="process">0%</span>
+    </a>
+    <script>
+        var fileUpload = document.getElementsByClassName("fileUpload")[0];
+        var process = document.getElementsByClassName("process")[0];
+        var fileView = document.getElementsByClassName("fileView")[0];
+        fileUpload.addEventListener("drop", function (event) {
+            event.preventDefault()
+            event.stopPropagation()
+            var size = event.dataTransfer.files[0].size / 1024;
+            fileView.innerText = "文件名：" + event.dataTransfer.files[0].name + "大小：" + size.toFixed(2) + "KB";
+
+            // 查看拖拽文件
+            console.log(event.dataTransfer.files[0])
+
+            var formData = new FormData();
+            formData.append("fileUpload", event.dataTransfer.files[0])
+
+            var ajax = new XMLHttpRequest()
+            console.log(ajax)
+            // precess 进度条
+            ajax.upload.onprogress = function(ev) {
+                process.innerText = (100 * ev.loaded / ev.total).toFixed(2) + '%';
+                process.style.width = (100 * ev.loaded / ev.total).toFixed(2) + '%';
+            }
+
+            ajax.open("POST", "http://localhost:3000/upload")
+            ajax.send(formData)
+            ajax.onreadystatechange = function () {
+                if (ajax.readyState == 4) {
+                    if (ajax.status == 200) {
+                        console.log(ajax.responseText);
+                    }
+                }
+            }
+        })
+        fileUpload.addEventListener('dragover', function (e) {
+            e.stopPropagation()
+            e.preventDefault()
+            e.dataTransfer.dropEffect = 'copy';
+        });
+    </script>
+</body>
+
+</html>
